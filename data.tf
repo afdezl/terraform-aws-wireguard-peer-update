@@ -1,4 +1,5 @@
 
+data "aws_region" "current" {}
 
 data "aws_iam_policy_document" "ssm_wg_peer_updater_trust" {
   statement {

@@ -25,12 +25,12 @@ PATTERN
 
 
 resource "aws_iam_role" "ssm_wg_peer_updater" {
-  name = "SSMWireguardUpdater"
+  name = "${var.name}-wireguard-peer-update-${data.aws_region.current.name}"
   assume_role_policy = data.aws_iam_policy_document.ssm_wg_peer_updater_trust.json
 }
 
 resource "aws_iam_policy" "ssm_wg_peer_updater" {
-  name = "SSMWireguardUpdater"
+  name = "${var.name}-wireguard-peer-update-${data.aws_region.current.name}"
   policy = data.aws_iam_policy_document.ssm_wg_peer_updater.json
 }
 
@@ -63,16 +63,13 @@ resource "aws_ssm_document" "update_wg_peers" {
 
 schemaVersion: '2.2'
 description: Dynamically adds peer configuration to WireGuard
-parameters:
-  region:
-    type: String
-    default: eu-west-1
+
 mainSteps:
 - action: aws:runShellScript
   name: reconfigureWireguard
   inputs:
     runCommand:
-    - "sudo python3 /opt/wireguard/wg_config_creator.py {{ region }} > /tmp/wg0-updated.conf"
+    - "sudo python3 /opt/wireguard/wg_config_creator.py > /tmp/wg0-updated.conf"
     - "sudo wg-quick strip /tmp/wg0-updated.conf > /tmp/wg0-stripped.conf"
     - "sudo wg setconf wg0 /tmp/wg0-stripped.conf"
     - "sudo wg-quick save wg0"
